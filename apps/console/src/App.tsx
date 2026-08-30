@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity,
-  ArrowDownRight,
   Box,
   Braces,
   ChevronRight,
@@ -28,36 +27,57 @@ const trueForgeEmbedUrl = import.meta.env.VITE_TRUEFORGE_EMBED_URL ?? "http://lo
 const prompt =
   "Investigate incident inc-checkout-2026-08-30. Gather evidence from every relevant control-plane tool, delegate at least two competing hypotheses, and write a small correlation script in the sandbox. If a deploy caused the regression, propose the safest remediation with your evidence. Do not execute any rollback until I approve the exact tool call.";
 
+type ControlPlaneState = "idle" | "connecting" | "online" | "stale";
+type HarnessState = "idle" | "checking" | "reachable" | "offline";
+
 export default function App() {
   const [mode, setMode] = useState<RunMode>("replay");
   const [snapshot, setSnapshot] = useState<Snapshot>(initialReplay);
-  const [connected, setConnected] = useState(false);
-  const [harnessReady, setHarnessReady] = useState(false);
-  const [harnessChecking, setHarnessChecking] = useState(false);
+  const [controlPlaneState, setControlPlaneState] = useState<ControlPlaneState>("idle");
+  const [hasLiveSnapshot, setHasLiveSnapshot] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const [resetError, setResetError] = useState<string | null>(null);
+  const [harnessState, setHarnessState] = useState<HarnessState>("idle");
   const [replayRunning, setReplayRunning] = useState(false);
   const [approvalWaiting, setApprovalWaiting] = useState(false);
   const [copied, setCopied] = useState(false);
+  const modeRef = useRef<RunMode>(mode);
+  const replayRunRef = useRef(0);
+  const resetRunRef = useRef(0);
+  const replayButtonRef = useRef<HTMLButtonElement>(null);
+  const approvalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (mode !== "live") return;
     let active = true;
+    let inFlight = false;
+    const controller = new AbortController();
+    setControlPlaneState("connecting");
+    setHasLiveSnapshot(false);
+    setResetError(null);
     const load = async () => {
+      if (inFlight) return;
+      inFlight = true;
       try {
-        const response = await fetch(`${controlPlaneUrl}/api/snapshot`);
+        const response = await fetch(`${controlPlaneUrl}/api/snapshot`, { signal: controller.signal });
         if (!response.ok) throw new Error("Control plane unavailable");
         const value = (await response.json()) as Snapshot;
         if (active) {
           setSnapshot(value);
-          setConnected(true);
+          setHasLiveSnapshot(true);
+          setControlPlaneState("online");
         }
       } catch {
-        if (active) setConnected(false);
+        if (active) setControlPlaneState("stale");
+      } finally {
+        inFlight = false;
       }
     };
     void load();
     const timer = window.setInterval(load, 1500);
     return () => {
       active = false;
+      controller.abort();
       window.clearInterval(timer);
     };
   }, [mode]);
@@ -65,35 +85,86 @@ export default function App() {
   useEffect(() => {
     if (mode !== "live") return;
     let active = true;
-    setHarnessChecking(true);
-    fetch(`${trueForgeUrl}/api/v1/capabilities`)
+    const controller = new AbortController();
+    setHarnessState("checking");
+    fetch(`${trueForgeUrl}/api/v1/capabilities`, { signal: controller.signal })
       .then((response) => {
         if (!response.ok) throw new Error("TrueForge unavailable");
-        if (active) setHarnessReady(true);
+        if (active) setHarnessState("reachable");
       })
       .catch(() => {
-        if (active) setHarnessReady(false);
-      })
-      .finally(() => {
-        if (active) setHarnessChecking(false);
+        if (active) setHarnessState("offline");
       });
     return () => {
       active = false;
+      controller.abort();
     };
   }, [mode]);
+
+  useEffect(() => {
+    modeRef.current = mode;
+  }, [mode]);
+
+  useEffect(() => {
+    if (approvalWaiting && mode === "replay") approvalRef.current?.focus();
+  }, [approvalWaiting, mode]);
+
+  useEffect(
+    () => () => {
+      replayRunRef.current += 1;
+      resetRunRef.current += 1;
+    },
+    [],
+  );
 
   const activeDeploy = useMemo(
     () => snapshot.deployments.find((deployment) => deployment.active),
     [snapshot.deployments],
   );
   const resolved = snapshot.incident.status === "resolved";
+  const connected = controlPlaneState === "online";
+  const snapshotStale = mode === "live" && !connected;
+  const replayStepCount = snapshot.audit.filter((event) => event.id.startsWith("replay-")).length;
+  const harnessLabel = mode === "replay"
+    ? "Replay ready"
+    : harnessState === "checking"
+      ? "Checking TrueForge"
+      : harnessState === "reachable"
+        ? "TrueForge reachable"
+        : "TrueForge offline";
+
+  const selectMode = (nextMode: RunMode) => {
+    if (nextMode === modeRef.current) return;
+    replayRunRef.current += 1;
+    resetRunRef.current += 1;
+    modeRef.current = nextMode;
+    setReplayRunning(false);
+    setApprovalWaiting(false);
+    setResetting(false);
+    setResetError(null);
+    setMode(nextMode);
+    if (nextMode === "live") {
+      setControlPlaneState("connecting");
+      setHasLiveSnapshot(false);
+      setHarnessState("checking");
+    }
+    if (nextMode === "replay") {
+      setSnapshot(structuredClone(initialReplay));
+      setControlPlaneState("idle");
+      setHasLiveSnapshot(false);
+      setHarnessState("idle");
+    }
+  };
 
   const startReplay = async () => {
+    const runId = replayRunRef.current + 1;
+    replayRunRef.current = runId;
     setSnapshot(structuredClone(initialReplay));
     setApprovalWaiting(false);
     setReplayRunning(true);
     for (const [index, step] of replaySteps.entries()) {
       await new Promise((resolve) => window.setTimeout(resolve, index === 0 ? 350 : 620));
+      if (replayRunRef.current !== runId || modeRef.current !== "replay") return;
       setSnapshot((current) => ({
         ...current,
         audit: [
@@ -106,6 +177,7 @@ export default function App() {
         ],
       }));
     }
+    if (replayRunRef.current !== runId || modeRef.current !== "replay") return;
     setReplayRunning(false);
     setApprovalWaiting(true);
   };
@@ -113,17 +185,44 @@ export default function App() {
   const approveReplay = () => {
     setSnapshot((current) => recoverReplay(current));
     setApprovalWaiting(false);
+    window.setTimeout(() => replayButtonRef.current?.focus(), 0);
+  };
+
+  const denyReplay = () => {
+    setApprovalWaiting(false);
+    window.setTimeout(() => replayButtonRef.current?.focus(), 0);
   };
 
   const resetLive = async () => {
-    const response = await fetch(`${controlPlaneUrl}/api/reset`, { method: "POST" });
-    if (response.ok) setSnapshot((await response.json()) as Snapshot);
+    const resetId = resetRunRef.current + 1;
+    resetRunRef.current = resetId;
+    setResetting(true);
+    setResetError(null);
+    try {
+      const response = await fetch(`${controlPlaneUrl}/api/reset`, { method: "POST" });
+      if (!response.ok) throw new Error("Reset request failed");
+      const value = (await response.json()) as Snapshot;
+      if (modeRef.current !== "live" || resetRunRef.current !== resetId) return;
+      setSnapshot(value);
+      setHasLiveSnapshot(true);
+      setControlPlaneState("online");
+    } catch {
+      if (modeRef.current === "live" && resetRunRef.current === resetId) {
+        setResetError("Scenario reset failed. No changes were applied; retry when the control plane is linked.");
+      }
+    } finally {
+      if (modeRef.current === "live" && resetRunRef.current === resetId) setResetting(false);
+    }
   };
 
   const copyPrompt = async () => {
-    await navigator.clipboard.writeText(prompt);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1500);
+    try {
+      await navigator.clipboard.writeText(prompt);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      setCopied(false);
+    }
   };
 
   return (
@@ -134,12 +233,12 @@ export default function App() {
           <span><strong>FuseOps</strong><small>Incident command</small></span>
         </a>
         <div className="mode-switch" role="group" aria-label="Run mode">
-          <button className={mode === "live" ? "is-active" : ""} onClick={() => setMode("live")}>Live harness</button>
-          <button className={mode === "replay" ? "is-active" : ""} onClick={() => { setMode("replay"); setSnapshot(initialReplay); }}>Demo replay</button>
+          <button type="button" aria-pressed={mode === "live"} className={mode === "live" ? "is-active" : ""} onClick={() => selectMode("live")}>Live harness</button>
+          <button type="button" aria-pressed={mode === "replay"} className={mode === "replay" ? "is-active" : ""} onClick={() => selectMode("replay")}>Demo replay</button>
         </div>
-        <div className={`connection ${mode === "replay" || connected ? "is-online" : ""}`}>
+        <div className={`connection ${mode === "replay" || connected ? "is-online" : ""}`} role="status" aria-live="polite">
           {mode === "replay" || connected ? <Wifi size={14} /> : <WifiOff size={14} />}
-          <span>{mode === "replay" ? "Credential-free replay" : connected ? "Control plane linked" : "Control plane offline"}</span>
+          <span>{mode === "replay" ? "Credential-free replay" : connected ? "Control plane linked" : controlPlaneState === "connecting" ? "Control plane connecting" : "Control plane data stale"}</span>
         </div>
       </header>
 
@@ -155,17 +254,27 @@ export default function App() {
         </div>
         <div className="hero-actions">
           {mode === "replay" ? (
-            <button className="button button--primary" onClick={startReplay} disabled={replayRunning || approvalWaiting}>
+            <button ref={replayButtonRef} type="button" className="button button--primary" onClick={startReplay} disabled={replayRunning || approvalWaiting} aria-busy={replayRunning} aria-describedby="replay-progress">
               <Play size={16} fill="currentColor" /> {replayRunning ? "Investigation running" : resolved ? "Replay again" : "Run investigation"}
             </button>
           ) : (
-            <button className="button button--quiet" onClick={resetLive}><RotateCcw size={16} /> Reset scenario</button>
+            <button type="button" className="button button--quiet" onClick={resetLive} disabled={resetting} aria-busy={resetting}><RotateCcw size={16} /> {resetting ? "Resetting scenario…" : "Reset scenario"}</button>
           )}
-          <button className="button button--quiet" onClick={copyPrompt}><Braces size={16} /> {copied ? "Prompt copied" : "Copy demo prompt"}</button>
+          <button type="button" className="button button--quiet" onClick={copyPrompt}><Braces size={16} /> {copied ? "Prompt copied" : "Copy demo prompt"}</button>
         </div>
       </section>
 
-      <section className="metric-grid" aria-label="Live service health">
+      {mode === "live" && (snapshotStale || resetError) ? (
+        <div className={`runtime-alert ${resetError || controlPlaneState === "stale" ? "runtime-alert--error" : ""}`} role={resetError || controlPlaneState === "stale" ? "alert" : "status"} aria-live="polite">
+          <WifiOff size={16} />
+          <span>
+            <strong>{resetError ?? (controlPlaneState === "connecting" ? "Connecting to the control plane…" : "Live snapshot unavailable.")}</strong>
+            <small>{hasLiveSnapshot ? "Showing the last verified live snapshot while automatic retry continues." : "Metrics remain marked as demo data until a live snapshot is verified."}</small>
+          </span>
+        </div>
+      ) : null}
+
+      <section className={`metric-grid ${snapshotStale ? "metric-grid--stale" : ""}`} aria-label={snapshotStale ? "Service health — unverified demo snapshot" : "Live service health"} aria-busy={mode === "live" && controlPlaneState === "connecting"}>
         <MetricCard eyebrow="Error rate" value={`${snapshot.service.errorRatePct.toFixed(1)}%`} note={resolved ? "Within 2% SLO" : "+17.3 points after deploy"} tone={resolved ? "safe" : "danger"} icon={<Activity size={18} />} />
         <MetricCard eyebrow="p95 latency" value={`${snapshot.service.p95LatencyMs.toLocaleString()} ms`} note={resolved ? "Baseline restored" : "6.8× baseline"} tone={resolved ? "safe" : "danger"} icon={<Gauge size={18} />} />
         <MetricCard eyebrow="Active release" value={snapshot.service.activeVersion.replace("checkout-", "")} note={`${activeDeploy?.commit ?? "unknown"} · ${snapshot.service.region}`} tone={resolved ? "safe" : "neutral"} icon={<GitBranch size={18} />} />
@@ -193,24 +302,30 @@ export default function App() {
         <aside className="agent-pane">
           <div className="panel-heading panel-heading--agent">
             <div><span>{mode === "live" ? "Live TrueForge session" : "Harness preview"}</span><h2>FuseOps commander</h2></div>
-            <span className="harness-badge"><span /> harness central</span>
+            <span className={`harness-badge harness-badge--${mode === "replay" ? "ready" : harnessState}`} role="status" aria-live="polite"><span /> {harnessLabel}</span>
           </div>
           {mode === "live" ? (
             <div className="trueforge-frame">
-              {harnessReady ? (
-                <iframe
-                  src={`${trueForgeEmbedUrl}/`}
-                  title="Live TrueForge agent session"
-                  loading="eager"
-                  allow="clipboard-read; clipboard-write"
-                />
+              {harnessState === "reachable" ? (
+                <>
+                  <div className="harness-preflight" role="note">
+                    <ShieldCheck size={16} />
+                    <span><strong>TrueForge service reached</strong><small>Select FuseOps Commander and confirm 6 MCP tools before sending the demo prompt.</small></span>
+                  </div>
+                  <iframe
+                    src={`${trueForgeEmbedUrl}/`}
+                    title="Live TrueForge agent session"
+                    loading="eager"
+                    allow="clipboard-read; clipboard-write"
+                  />
+                </>
               ) : (
                 <div className="harness-offline" role="status">
-                  {harnessChecking ? <span className="harness-spinner" /> : <WifiOff size={22} />}
-                  <h3>{harnessChecking ? "Looking for TrueForge…" : "TrueForge is offline"}</h3>
+                  {harnessState === "checking" ? <span className="harness-spinner" /> : <WifiOff size={22} />}
+                  <h3>{harnessState === "checking" ? "Looking for TrueForge…" : "TrueForge is offline"}</h3>
                   <p>Start the local harness at <code>localhost:8790</code>, configure the model, sandbox, and FuseOps MCP connector, then reload.</p>
-                  <code>npx @truefoundry/trueforge@latest</code>
-                  <button className="button button--quiet" onClick={() => setMode("replay")}><Play size={15} /> Use credential-free replay</button>
+                  <code>npx @truefoundry/trueforge@0.1.4</code>
+                  <button type="button" className="button button--quiet" onClick={() => selectMode("replay")}><Play size={15} /> Use credential-free replay</button>
                 </div>
               )}
             </div>
@@ -221,19 +336,28 @@ export default function App() {
                 <span>Operator</span>
                 <p>Investigate the checkout incident. Prove the cause, then propose the safest remediation.</p>
               </div>
-              <div className="agent-response">
+              <div className="agent-response" aria-live="polite" aria-atomic="true">
                 <span className="agent-avatar"><ShieldCheck size={16} /></span>
                 <div>
                   <strong>FuseOps</strong>
                   <p>{resolved ? "Rollback completed after approval. Error rate is back to 1.2%, and checkout-v42 is active." : approvalWaiting ? "Evidence converges on deploy 4c21f0a. I am holding the rollback until you approve the exact action." : replayRunning ? "Investigating across metrics, deploy history, logs, and isolated analysis…" : "I’ll investigate with read-only tools first. I won’t change service state without your approval."}</p>
                 </div>
               </div>
+              <p className="sr-only" id="replay-progress" role="status" aria-live="polite" aria-atomic="true">
+                {replayRunning
+                  ? `Investigation in progress. ${replayStepCount} of ${replaySteps.length} evidence steps complete.`
+                  : approvalWaiting
+                    ? "Investigation complete. Human approval is required before rollback."
+                    : resolved
+                      ? "Rollback approved. Checkout recovered."
+                      : "Investigation ready to run."}
+              </p>
               {approvalWaiting ? (
-                <div className="approval-card">
-                  <div className="approval-card__title"><ShieldCheck size={18} /><div><span>Human checkpoint</span><strong>Allow rollback_deployment?</strong></div></div>
+                <div ref={approvalRef} className="approval-card" role="region" aria-labelledby="approval-title" aria-describedby="approval-description" aria-live="assertive" tabIndex={-1}>
+                  <div className="approval-card__title"><ShieldCheck size={18} /><div><span>Human checkpoint</span><strong id="approval-title">Allow rollback_deployment?</strong></div></div>
                   <dl><div><dt>Deployment</dt><dd>checkout-v43 · 4c21f0a</dd></div><div><dt>Target</dt><dd>checkout-v42</dd></div><div><dt>Reason</dt><dd>0.94 deploy/error correlation</dd></div></dl>
-                  <p>Replay control only. In live mode, TrueForge owns this checkpoint and the tool cannot run before Allow.</p>
-                  <div className="approval-card__actions"><button className="button button--quiet" onClick={() => setApprovalWaiting(false)}>Deny</button><button className="button button--approve" onClick={approveReplay}><ShieldCheck size={15} /> Allow rollback</button></div>
+                  <p id="approval-description">Replay control only. In live mode, TrueForge owns this checkpoint and the tool cannot run before Allow.</p>
+                  <div className="approval-card__actions"><button type="button" className="button button--quiet" onClick={denyReplay}>Deny</button><button type="button" className="button button--approve" onClick={approveReplay}><ShieldCheck size={15} /> Allow rollback</button></div>
                 </div>
               ) : null}
               <div className="capability-row">

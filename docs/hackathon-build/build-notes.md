@@ -12,3 +12,9 @@
 - Checklist mode: autonomous speed-run, no participant pauses until MVP visual testing.
 - Active shaping note: no user-specific visual taste was supplied, so the interface direction is a calm flight-recorder operations console rather than a generic dashboard.
 
+## 2026-08-30 — Pre-submission live verification
+
+- Replay flows, automated checks, MCP contracts, TrueForge configuration/discovery, and the embedded client passed.
+- The first end-to-end live attempt did not reach a tool call: Docker-hosted CPU-only Qwen3 14B remained in its first generation for 5m24s before cancellation.
+- A smaller 7B direct smoke also emitted no tool call within 60 seconds, so model size alone is not accepted as proof of a working live path.
+- Submission remains gated on a responsive tool-capable cloud model or native Metal-accelerated Ollama completing tools, sandbox/subagents, approval, mutation, and recovery.

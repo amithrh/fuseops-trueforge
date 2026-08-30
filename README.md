@@ -15,7 +15,7 @@ The included scenario is deterministic and uses no customer data or cloud creden
 ## The three-minute story
 
 1. A checkout deploy is followed by an 18.4% error rate and 2.1 second p95 latency.
-2. The TrueForge agent reads the incident, health, deploy history, sanitized logs, and runbook through six real MCP tools.
+2. The TrueForge agent reads the incident, health, deploy history, sanitized logs, and runbook through five read-only MCP tools; a sixth tool is reserved for the guarded rollback.
 3. It delegates competing hypotheses and runs a correlation script in the TrueForge sandbox.
 4. Evidence converges on `checkout-v43` / commit `4c21f0a`.
 5. TrueForge pauses `rollback_deployment` and exposes its exact arguments for human review.
@@ -60,7 +60,7 @@ Qodo surfaced **`QODO_FINDING_SUMMARY`**. We **`QODO_DECISION_AND_CHANGE`**. The
 
 - Node.js 22.14 or newer
 - A model provider supported by TrueForge, or a local OpenAI-compatible provider such as Ollama
-- TrueForge standalone v0.1.4 or newer
+- TrueForge standalone v0.1.4 (locally verified)
 
 ### 1. Install and verify
 
@@ -69,7 +69,7 @@ npm install
 npm run check
 ```
 
-`npm run check` type-checks both apps, runs 12 tests, and creates production builds.
+`npm run check` type-checks both apps, runs 16 tests, and creates production builds.
 
 ### 2. Start FuseOps
 
@@ -84,14 +84,14 @@ Open [http://127.0.0.1:4173](http://127.0.0.1:4173). The credential-free replay 
 In another terminal:
 
 ```bash
-NPM_CONFIG_CACHE=/tmp/fuseops-npm-cache npx --yes @truefoundry/trueforge@latest --port 8790
+NPM_CONFIG_CACHE=/tmp/fuseops-npm-cache npx --yes @truefoundry/trueforge@0.1.4 --port 8790
 ```
 
 In TrueForge settings:
 
 1. Configure your model provider and copy its exact model FQN.
 2. Add an HTTP MCP server named `fuseops-control-plane` with URL `http://localhost:3100/mcp`; no auth is required locally.
-3. Register the FuseOps agent:
+3. Create or update the FuseOps agent (the command is safe to repeat):
 
 ```bash
 TRUEFORGE_MODEL=your-provider/your-model npm run agent:register
@@ -99,13 +99,21 @@ TRUEFORGE_MODEL=your-provider/your-model npm run agent:register
 
 For the locally verified configuration, Ollama exposed `qwen3:14b` at `http://localhost:11434/v1` and the agent used `ollama-local/qwen3-14b`.
 
-Switch the console to **Live harness**, select **FuseOps Commander** if needed, reset the scenario, and paste the prompt produced by **Copy demo prompt**.
+Qwen 3 can spend most of a local demo in its optional thinking mode. When using Qwen through Ollama, put `/no_think` on the first line before the copied demo prompt. Omit that provider-specific control token for cloud models that do not document it. The checked-in manifest caps each response at 1,200 tokens so the tool-driven run remains practical on local hardware.
+
+Switch the console to **Live harness**, open the embedded TrueForge agent library and select **FuseOps Commander**, reset the scenario, and paste the prompt produced by **Copy demo prompt**. The iframe starts at TrueForge's normal home screen, so selecting the saved agent is an explicit setup step.
+
+### Pre-submission live-run gate
+
+Replay, the six-tool MCP contract, the guarded state machine, builds, and the embedded TrueForge client are verified locally. The complete TrueForge path through model generation, MCP calls, sandbox/subagents, the approval card, and post-approval recovery is **not yet verified**.
+
+The current Docker-hosted Ollama `qwen3:14b` run stayed in its first CPU-only generation for 5 minutes 24 seconds and emitted no tool call before cancellation. A direct smoke test with a smaller 7B model also emitted no tool call within 60 seconds. Before recording or submitting, use a responsive tool-capable cloud model or run Ollama natively with Metal acceleration, re-register the agent with its exact model FQN, and complete the live approval flow. `/no_think` and the 1,200-token cap reduce local work, but they are not substitutes for that proof.
 
 ## Useful commands
 
 ```bash
 npm run typecheck       # TypeScript checks
-npm test                # 12 safety and replay tests
+npm test                # 16 safety, replay, and console-behavior tests
 npm run build           # Production builds
 npm run check           # All of the above
 npm run agent:preview   # Print the resolved manifest without registering
@@ -137,6 +145,7 @@ docs/                  Scope, PRD, architecture, checklist, demo, and PR packet
 - The simulator deliberately avoids live cloud and payment credentials.
 - TrueForge standalone is for local use and should not be exposed to the public internet.
 - Provider and sandbox availability depend on the judge's local TrueForge setup; replay mode remains fully evaluable without them.
+- The checked-in live flow is configured but must still pass the pre-submission live-run gate above on a responsive tool-capable provider.
 
 ## AI assistance disclosure
 

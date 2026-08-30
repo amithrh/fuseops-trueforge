@@ -2,20 +2,20 @@
 
 ## Overview
 
-FuseOps is an npm workspace with a React operator console, a TypeScript MCP control-plane server, shared deterministic fixtures, and setup scripts for TrueForge. The live path embeds the official TrueForge UI SDK in `SingleAgent` mode; the replay path uses the same console components with recorded public fixtures.
+FuseOps is an npm workspace with a React operator console, a TypeScript MCP control-plane server, shared deterministic fixtures, and setup scripts for TrueForge. The live path embeds the official TrueForge standalone web client in an iframe; the replay path uses the same console components with deterministic public fixtures.
 
 ## Stack
 
 - Node.js 22+ and TypeScript for a single-language workspace.
 - React 19 + Vite for the console.
-- `@truefoundry/trueforge-ui` and `@truefoundry/trueforge-sdk` for live sessions and official trace/approval UI.
+- TrueForge standalone v0.1.4 for live sessions and the official trace/approval UI.
 - `@modelcontextprotocol/sdk` with Streamable HTTP transport for the owned operations connector.
 - Express for MCP transport plus read-only console endpoints.
 - Zod for tool input validation.
-- Vitest for unit/contract tests; Playwright for browser verification.
+- Vitest for state-machine, MCP contract, replay-state, and console-behavior tests; direct desktop/mobile browser verification for the assembled UI.
 - TrueForge local mode at `http://localhost:8790`.
 
-Documentation: [TrueForge UI SDK](https://trueforge.dev/ui-sdk/get-started/quickstart), [Create an Agent](https://trueforge.dev/create-agent/overview), [MCP SDK](https://github.com/modelcontextprotocol/typescript-sdk).
+Documentation: [Create an Agent](https://trueforge.dev/create-agent/overview), [MCP SDK](https://github.com/modelcontextprotocol/typescript-sdk).
 
 ## Architecture
 
@@ -23,7 +23,7 @@ Documentation: [TrueForge UI SDK](https://trueforge.dev/ui-sdk/get-started/quick
 
 Implements: `prd.md > Epic 4: See what happened` and `Epic 5: Run and judge the project`.
 
-The console polls `/api/snapshot` from the owned simulator and renders health, incident context, and audit chronology. In live mode it mounts `TrueForgeUI` configured for `fuseops-commander`. In replay mode it animates a deterministic event fixture and clearly labels the run as replayed.
+The console polls `/api/snapshot` from the owned simulator and renders health, incident context, and audit chronology. In live mode it performs a readiness check through a narrow Vite proxy, then embeds the standalone TrueForge home screen from `localhost:8790`; the operator selects the saved `fuseops-commander` agent in TrueForge. In replay mode it animates a deterministic event fixture and clearly labels the run as replayed.
 
 ### FuseOps control-plane MCP server
 
@@ -58,23 +58,22 @@ An in-memory state machine starts with version `checkout-v43`, error rate `18.4`
 .
 ├── apps/
 │   ├── console/
-│   │   ├── src/components/       # dashboard, timeline, replay, connection states
-│   │   ├── src/lib/              # API client and typed models
-│   │   └── src/App.tsx           # live/replay shell + embedded TrueForge UI
+│   │   ├── src/components/       # metric and timeline components
+│   │   ├── src/replay.ts         # deterministic replay states
+│   │   └── src/App.tsx           # live/replay shell + TrueForge iframe
 │   └── control-plane/
 │       ├── src/incident-store.ts  # deterministic state machine
 │       ├── src/tools.ts           # MCP tool contracts and handlers
 │       └── src/index.ts           # HTTP/MCP server
 ├── config/fuseops-agent.json      # auditable TrueForge agent spec
 ├── scripts/register-agent.ts      # installs/updates named agent
-├── tests/e2e/                     # browser flow
 ├── docs/hackathon-build/          # durable planning evidence
 └── README.md                      # setup, architecture, Qodo evidence
 ```
 
 ## Data Flow
 
-1. The operator sends the seeded incident prompt in the embedded TrueForge UI.
+1. The operator selects `fuseops-commander` and sends the seeded incident prompt in the embedded TrueForge standalone client.
 2. TrueForge resolves `fuseops-control-plane` and calls read-only MCP tools.
 3. The MCP server reads the incident store and records evidence-access audit events.
 4. TrueForge delegates hypotheses and uses its Daytona sandbox for a correlation script.
@@ -105,13 +104,13 @@ There is no direct model API call in FuseOps. All reasoning and action flow thro
 
 ## Risks And Verification
 
-- **SDK drift:** typecheck against installed current packages and keep the TrueForge manifest as plain JSON.
+- **Standalone/API drift:** pin the locally verified TrueForge v0.1.4 command, keep the agent manifest as plain JSON, and use its documented list/create/update agent endpoints.
 - **MCP transport mismatch:** contract-test initialize, tools/list, and tools/call through the official client SDK.
 - **Approval bypass:** both destructive MCP annotations and explicit TrueForge agent policy gate rollback; tests verify the store cannot roll back an unrelated deployment.
 - **Missing Daytona/model keys:** replay mode keeps UI evaluation possible, while README clearly separates replay from the required live judging path.
-- **CORS/local ports:** configurable `VITE_TRUEFORGE_URL` and `VITE_CONTROL_PLANE_URL` with documented defaults.
+- **Local model latency/tool compliance:** CPU-only Docker inference may fail to emit tool calls within a demo window. Treat replay and MCP contracts as separate evidence; require a complete live run on a responsive cloud tool model or native Metal-accelerated local runtime before submission.
+- **CORS/local ports:** use `VITE_TRUEFORGE_URL` for the proxied readiness check, `VITE_TRUEFORGE_EMBED_URL` for the iframe origin, and `VITE_CONTROL_PLANE_URL` for dashboard polling, all with documented local defaults.
 
 ## Demo And Submission Flow
 
-The demo uses a clean reset, starts both workspace apps and TrueForge, opens the operator console, runs the recommended prompt, expands agent steps during delegation/sandbox work, dwells on the Allow/Deny gate, approves, and ends on the recovered health strip plus audit record. A backup replay follows the same visual sequence without implying a live agent run.
-
+The submission demo requires a clean reset, both workspace apps and TrueForge, a responsive tool-capable model, the recommended prompt, visible delegation/sandbox work, the real Allow/Deny gate, an approved mutation, and the recovered health strip plus audit record. Replay may supplement this story but cannot count as live-run proof.

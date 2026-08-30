@@ -33,29 +33,29 @@
   Spec ref: `spec.md > TrueForge agent`
   What to build: Auditable agent JSON and idempotent registration script with MCP approval, sandbox, subagents, and instructions.
   Acceptance: Manifest requires evidence, sandbox correlation, delegation, and approval for rollback.
-  Verify: Schema/type tests and a dry-run registration command.
+  Verify: `npm run agent:preview`, followed by repeated registration against local TrueForge to exercise create-or-update behavior.
 
 - [x] **5. Build the operator console foundation**
   Spec ref: `spec.md > Operator console`
   What to build: Responsive visual shell, incident header, metric cards, system map, connection status, and live snapshot polling.
   Acceptance: A judge can understand severity, affected service, active version, and current health in five seconds.
-  Verify: Component tests and browser screenshot at desktop/mobile sizes.
+  Verify: Component and replay-state tests, production build, and browser screenshots at desktop/mobile sizes.
 
 - [x] **6. Embed TrueForge and safety UX**
   Spec ref: `spec.md > Operator console`
-  What to build: Single-agent TrueForge UI, branded theme, investigation prompt, evidence timeline, and visible waiting/recovery states.
+  What to build: Embedded TrueForge standalone client, investigation prompt, evidence timeline, and visible waiting/recovery states.
   Acceptance: Live mode exposes the official TrueForge trace and approval card without hiding harness behavior.
-  Verify: Production build and browser smoke test with mocked backend status.
+  Verify: Production build and live iframe/composer smoke test passed; the real approval-card execution remains the explicit step 11 gate.
 
 - [x] **7. Add deterministic replay mode**
   Spec ref: `spec.md > Operator console`
   What to build: Clearly labeled replay controls and a timed fixture covering evidence, delegation, sandbox, approval wait, and recovery.
   Acceptance: UI and demo story can be evaluated without API credentials, and replay cannot be mistaken for a live run.
-  Verify: Playwright exercises replay start, approval, and recovered state.
+  Verify: Vitest checks the replay-state boundary and recovery transformation; desktop/mobile browser review exercises start, deny, allow, and recovered states.
 
 - [x] **8. Harden quality and safety**
   Spec ref: `spec.md > Risks And Verification`
-  What to build: Validation, CORS policy, error states, idempotency tests, lint/type/build checks, and secret scan.
+  What to build: Validation, CORS policy, error states, idempotency tests, type/build checks, and secret scan.
   Acceptance: Test suite covers safety invariants and no credential-like material is tracked.
   Verify: `npm run check` and repository secret grep.
 
@@ -68,14 +68,21 @@
 - [x] **10. Prepare submission handoff**
   Spec ref: `prd.md > Submission Proof Points`
   What to build: Submission write-up, honest limitations, testing instructions, form-answer draft, PR description, and final readiness checklist.
-  Acceptance: Only account-owned steps—public repo/Qodo PR, video URL, and form submission—remain.
-  Verify: Review handoff materials and confirm the next command is `prepare-submission`.
+  Acceptance: The handoff separates verified evidence, the pending live-runtime proof, and account-owned submission steps.
+  Verify: Review the handoff and ensure no draft language represents the pending live run as completed.
+
+- [ ] **11. Prove the live approval boundary before submission**
+  Spec ref: `spec.md > Demo And Submission Flow`
+  What to verify: Run a responsive tool-capable model through TrueForge evidence calls, sandbox/subagents, the real rollback approval card, approved mutation, and recovery check.
+  Current blocker: Docker-hosted CPU-only `qwen3:14b` remained in its first generation for 5m24s and emitted no MCP tool call before cancellation; a smaller 7B direct smoke also emitted no tool call within 60s.
+  Recommended next attempt: use a cloud tool-calling model or native Metal-accelerated Ollama, re-register the same agent, then record the exact session evidence.
 
 ## Completion evidence
 
-- `npm run check`: type-check, 12 tests, and two production builds passed on 2026-08-30.
+- `npm run check`: type-check, 16 tests, and two production builds passed on 2026-08-30.
 - MCP contract: initialize, tool discovery, evidence read, destructive annotations, and guarded mutation passed.
 - Browser: 1440 px desktop and 390 px mobile layouts reviewed; replay states and recovery interaction verified.
-- TrueForge: local capabilities, provider, six-tool MCP connection, agent manifest, approval policy, and embedded responsive composer verified.
+- TrueForge configuration: local capabilities, provider, six-tool MCP connection, agent manifest, approval policy, and embedded responsive composer verified.
+- TrueForge live execution: not yet verified beyond the first model generation; no live MCP tool call or approval card was reached.
 - Documentation: public README, MIT license, contribution policy, three-minute script, PR description, and submission answers created.
-- Account-owned items intentionally pending: publish repository, request and resolve Qodo review, record/upload video, replace URL placeholders, and submit the form.
+- Remaining prerequisites: complete the responsive-provider live run, then publish the repository, request and resolve Qodo review, record/upload the verified video, replace placeholders, and submit the form.

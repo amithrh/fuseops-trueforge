@@ -35,9 +35,9 @@ Incident response is split across telemetry, deploy history, runbooks, and risky
 - Read-only tools for metrics, deploys, logs, runbooks, and current service state.
 - A destructive rollback tool annotated so TrueForge gates it for human approval.
 - A TrueForge agent manifest with sandbox, subagents, Generative UI, and bounded iterations enabled.
-- A distinctive operations console embedding the official TrueForge UI SDK.
+- A distinctive operations console embedding the official TrueForge standalone web client.
 - A deterministic replay mode so judges can inspect the interface without credentials.
-- Automated unit, contract, and browser tests.
+- Automated unit and contract tests plus documented desktop/mobile browser checks.
 - Public-repo documentation, demo script, Qodo evidence placeholder, and submission copy.
 
 ## What We Are Not Building
@@ -66,4 +66,3 @@ The three-minute demo begins with checkout errors at 18.4%. FuseOps independentl
 ## Submission Story
 
 Most incident agents optimize speed. FuseOps optimizes justified action: it shows how an agent harness can make autonomy safer, more legible, and more trustworthy than a plain chatbot.
-

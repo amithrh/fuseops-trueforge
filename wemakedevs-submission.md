@@ -2,6 +2,8 @@
 
 Nothing has been sent to the WeMakeDevs form. This file mirrors the official two-page Google Form inspected on 2026-08-30.
 
+**Draft-only gate:** the live-flow answers below describe the intended submission demonstration. Do not paste them into the form until a responsive model/provider has completed the real TrueForge tool, sandbox/subagent, approval, rollback, and recovery path. Replay and MCP contract tests do not satisfy that proof.
+
 ## Required assets
 
 - Public GitHub repository: `PUBLIC_REPOSITORY_URL`
@@ -53,9 +55,13 @@ Maximum length: three minutes. Show the project, stack and architecture, working
 
 ### What does your project do? — required
 
+`FINALIZE_AFTER_LIVE_PROOF:`
+
 FuseOps is an approval-gated incident-response agent for SRE and platform teams. When checkout payment failures spike, it gathers incident context, service health, deploy history, sanitized logs, and the runbook through an owned MCP control plane. It delegates competing hypotheses, quantifies deploy/error correlation in an isolated sandbox, proposes the exact rollback, and stops until a human approves. After approval it performs a guarded, idempotent rollback and verifies recovery. The demo uses an owned local simulator and no customer data, proving that agents can investigate autonomously without receiving unchecked operational authority.
 
 ### How did you use TrueForge in your project? — required
+
+`FINALIZE_AFTER_LIVE_PROOF:`
 
 TrueForge is the runtime rather than a thin wrapper. The FuseOps agent runs through a durable TrueForge session and connects to six owned MCP tools: five read-only evidence tools and one destructive rollback tool. Its manifest requires dynamic subagents to test competing causes and a TrueForge sandbox script to measure correlation. TrueForge then pauses the exact rollback tool call for human approval. The live UI exposes the agent trace and approval boundary, while FuseOps records the resulting recovery state and audit trail.
 
@@ -77,11 +83,13 @@ Choose an honest score from 1–5 after the final live run: `TRUEFORGE_EASE_SCOR
 
 ### Which TrueForge feature was most useful, and why? — required
 
+`FINALIZE_AFTER_LIVE_PROOF:`
+
 The human approval checkpoint was the most valuable feature because it let FuseOps investigate independently while keeping the irreversible rollback under operator control. MCP orchestration made that boundary concrete: read-only evidence calls proceeded automatically, while the specifically annotated destructive call paused with inspectable arguments.
 
 ### Where did you get stuck with TrueForge, and what would you improve? — required
 
-The embeddable UI dependency graph pulled incompatible peer versions of Zustand through the assistant and OpenUI packages, so the production build initially worked while the embedded runtime hit an update loop. We stabilized the demo by embedding TrueForge's standalone client in an isolated frame. Clearer peer-dependency guidance and an officially documented iframe/base-path integration would improve the developer experience.
+The embeddable UI dependency graph pulled incompatible peer versions of Zustand through the assistant and OpenUI packages, so we stabilized the console by embedding TrueForge's standalone client in an isolated frame. Local model guidance was another friction point: Docker-hosted CPU-only Qwen3 14B spent 5m24s in its first generation without emitting a tool call, and a smaller 7B direct smoke also emitted none within 60 seconds. Clearer iframe/base-path documentation plus explicit guidance on tool-capable models and hardware acceleration would improve the developer experience.
 
 ### How useful was Qodo’s code-review feedback? — required
 
@@ -97,10 +105,10 @@ The representative FuseOps implementation PR (`QODO_REVIEWED_PR_URL`) stood out 
 
 ## Official compliance checklist
 
-- [x] Project runs on TrueForge and visibly uses the harness.
-- [x] Owned MCP tools perform real tool calls.
+- [ ] Full live project run visibly completes in TrueForge on a responsive provider.
+- [x] Owned MCP tools perform real calls through the official MCP client contract tests.
 - [x] Agent instructions require sandbox execution and subagents.
-- [x] Human approval guards the destructive rollback.
+- [ ] Real TrueForge approval card is reached and proven before the destructive rollback.
 - [x] No customer data or production credentials are used.
 - [x] Clear setup README, AI disclosure, tests, and open-source license exist.
 - [ ] Publish the GitHub repository.
@@ -108,6 +116,7 @@ The representative FuseOps implementation PR (`QODO_REVIEWED_PR_URL`) stood out 
 - [ ] Obtain initial Qodo review, respond to findings, push fixes, and obtain follow-up review.
 - [ ] Human-merge the reviewed PR.
 - [ ] Replace the exact README Qodo evidence placeholders with the merged PR and real review outcome.
+- [ ] Complete and preserve evidence from the live TrueForge tools → sandbox/subagents → approval → recovery run.
 - [ ] Run the README from a fresh clone and confirm `npm run check` passes.
 - [ ] Record and upload the final YouTube demo, maximum three minutes.
 - [ ] Fill the remaining Qodo and rating placeholders above.
@@ -115,10 +124,11 @@ The representative FuseOps implementation PR (`QODO_REVIEWED_PR_URL`) stood out 
 
 ## Recommended order
 
-1. Public repository and Qodo installation.
-2. Push `main` and `feat/fuseops-incident-commander`; open the prepared PR.
-3. Resolve Qodo findings, request follow-up review, and merge.
-4. Update README and this packet with the real evidence.
-5. Fresh-clone smoke test and secret scan.
-6. Record the video using `docs/demo-script.md`; upload to YouTube.
-7. Complete both pages of the WeMakeDevs form and review every URL before submitting.
+1. Configure a responsive tool-capable cloud model or native Metal-accelerated Ollama and complete the live approval-boundary run.
+2. Public repository and Qodo installation.
+3. Push `main` and `feat/fuseops-incident-commander`; open the prepared PR.
+4. Resolve Qodo findings, request follow-up review, and merge.
+5. Update README and this packet with the real live/Qodo evidence.
+6. Fresh-clone smoke test and secret scan.
+7. Record the verified live flow using `docs/demo-script.md`; upload to YouTube.
+8. Complete both pages of the WeMakeDevs form and review every URL before submitting.
