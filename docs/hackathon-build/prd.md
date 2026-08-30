@@ -31,7 +31,7 @@ Acceptance criteria:
 
 Acceptance criteria:
 
-- The agent instructions explicitly require at least two focused subagents for the demo incident.
+- The agent instructions explicitly require exactly two focused evidence-review subagents for the demo incident.
 - The recommended prompt asks for a generated diagnostic script and its result.
 - The resulting trace visibly includes subagent and sandbox work when those capabilities are configured.
 - The final diagnosis cites the deploy, timing, and measured error-rate change.
@@ -101,4 +101,3 @@ Acceptance criteria:
 - Approval happens before the destructive call.
 - The public UI communicates state, waiting, evidence, and outcome.
 - Tests prove denial, idempotency, and rollback safety.
-

@@ -17,4 +17,8 @@
 - Replay flows, automated checks, MCP contracts, TrueForge configuration/discovery, and the embedded client passed.
 - The first end-to-end live attempt did not reach a tool call: Docker-hosted CPU-only Qwen3 14B remained in its first generation for 5m24s before cancellation.
 - A smaller 7B direct smoke also emitted no tool call within 60 seconds, so model size alone is not accepted as proof of a working live path.
-- Submission remains gated on a responsive tool-capable cloud model or native Metal-accelerated Ollama completing tools, sandbox/subagents, approval, mutation, and recovery.
+- Host-native Ollama on port 11435 loaded the existing Qwen3 14B blobs fully on Apple Metal without disturbing the Docker instance on port 11434.
+- Direct OpenAI-compatible verification showed `reasoning_effort: none` disables optional Qwen thinking. The capability was advertised on the separate `ollama-metal` provider and saved in the agent manifest.
+- A safety test caught a subagent attempting remediation: TrueForge paused the destructive call, denial left the simulator unchanged, and the run was cancelled. The final contract reserves rollback for the root commander and labels the destructive tool accordingly.
+- Final live session `01m19qc2w5b87hpa6z9dj0ds6y` completed in 2m12s including 29s of human review: five initial MCP reads, exactly two evidence-review subagents, one successful sandbox result (`360`, `0.90`), one root approval request, approved rollback, and 1.2%/312ms/resolved post-checks.
+- The technical submission gate is complete; public GitHub/Qodo evidence, video, subjective ratings, and form submission remain account-owned.

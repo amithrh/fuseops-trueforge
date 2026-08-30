@@ -29,6 +29,8 @@ describe("FuseOps MCP contract", () => {
     const rollback = tools.find((tool) => tool.name === "rollback_deployment");
     expect(rollback?.annotations?.destructiveHint).toBe(true);
     expect(rollback?.annotations?.readOnlyHint).toBe(false);
+    expect(rollback?.description).toContain("ROOT COMMANDER ONLY");
+    expect(rollback?.description).toContain("Dynamic subagents must never call");
     expect(
       tools.filter((tool) => tool.name !== "rollback_deployment").every((tool) => tool.annotations?.readOnlyHint),
     ).toBe(true);
@@ -51,7 +53,7 @@ describe("FuseOps MCP contract", () => {
       arguments: {
         incident_id: incidentIds.incident,
         deployment_id: incidentIds.badDeployment,
-        evidence: "Deploy 4c21f0a preceded the error spike and correlated with failures at 0.94.",
+        evidence: "Deploy 4c21f0a preceded the error spike and correlated with failures at 0.90.",
       },
     });
     expect(result.isError).not.toBe(true);
@@ -74,4 +76,3 @@ describe("FuseOps MCP contract", () => {
     expect(store.snapshot()).toEqual(before);
   });
 });
-

@@ -25,7 +25,7 @@ const trueForgeUrl = import.meta.env.VITE_TRUEFORGE_URL ?? "/trueforge";
 const trueForgeEmbedUrl = import.meta.env.VITE_TRUEFORGE_EMBED_URL ?? "http://localhost:8790";
 
 const prompt =
-  "Investigate incident inc-checkout-2026-08-30. Gather evidence from every relevant control-plane tool, delegate at least two competing hypotheses, and write a small correlation script in the sandbox. If a deploy caused the regression, propose the safest remediation with your evidence. Do not execute any rollback until I approve the exact tool call.";
+  "Investigate incident inc-checkout-2026-08-30 for service checkout-api using the prescribed FuseOps workflow. Use only identifiers returned by tools. Give both subagents the concrete incident, service, deployment, timestamps, health, and log evidence. Start each delegated input with the required evidence-review-only rule: subagents may use read-only tools but must never call rollback_deployment or request remediation. Run the correlation in the TrueForge sandbox exactly once with an empty cwd and one inline standard-library Python command; do not create files or use mock data. If the evidence converges on a deploy regression, the root commander may propose the safest remediation. Do not execute any rollback until I approve the exact tool call.";
 
 type ControlPlaneState = "idle" | "connecting" | "online" | "stale";
 type HarnessState = "idle" | "checking" | "reachable" | "offline";
@@ -355,7 +355,7 @@ export default function App() {
               {approvalWaiting ? (
                 <div ref={approvalRef} className="approval-card" role="region" aria-labelledby="approval-title" aria-describedby="approval-description" aria-live="assertive" tabIndex={-1}>
                   <div className="approval-card__title"><ShieldCheck size={18} /><div><span>Human checkpoint</span><strong id="approval-title">Allow rollback_deployment?</strong></div></div>
-                  <dl><div><dt>Deployment</dt><dd>checkout-v43 · 4c21f0a</dd></div><div><dt>Target</dt><dd>checkout-v42</dd></div><div><dt>Reason</dt><dd>0.94 deploy/error correlation</dd></div></dl>
+                  <dl><div><dt>Deployment</dt><dd>checkout-v43 · 4c21f0a</dd></div><div><dt>Target</dt><dd>checkout-v42</dd></div><div><dt>Reason</dt><dd>0.90 deploy/error correlation</dd></div></dl>
                   <p id="approval-description">Replay control only. In live mode, TrueForge owns this checkpoint and the tool cannot run before Allow.</p>
                   <div className="approval-card__actions"><button type="button" className="button button--quiet" onClick={denyReplay}>Deny</button><button type="button" className="button button--approve" onClick={approveReplay}><ShieldCheck size={15} /> Allow rollback</button></div>
                 </div>

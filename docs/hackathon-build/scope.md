@@ -22,7 +22,7 @@ Incident response is split across telemetry, deploy history, runbooks, and risky
 
 1. An operator opens the seeded `payment-failures` incident.
 2. FuseOps reads live metrics, recent deploys, logs, and the runbook through the `fuseops-control-plane` MCP server.
-3. TrueForge delegates latency, deploy, and dependency hypotheses to focused subagents.
+3. TrueForge delegates exactly two competing evidence reviews: a deployment-regression hypothesis and a provider/database hypothesis.
 4. The root agent writes and runs a small correlation script in the TrueForge sandbox.
 5. FuseOps proposes rolling back the implicated deployment, showing expected impact and evidence.
 6. TrueForge pauses on the destructive MCP tool until the operator allows or denies it.
@@ -61,7 +61,7 @@ One focused build day before the August 30, 8:00 PM London deadline. Scope is in
 
 ## Demo Path
 
-The three-minute demo begins with checkout errors at 18.4%. FuseOps independently gathers evidence, delegates hypotheses, and runs a correlation script. The audience then sees the exact moment the rollback tool pauses with its arguments. The operator approves; metrics recover to 1.2%; the audit trail records who approved what and why.
+The three-minute demo begins with checkout errors at 18.4%. FuseOps independently gathers evidence, delegates hypotheses, and runs a correlation script that measures a 360-second deploy-to-incident interval and produces a 0.90 score. The audience then sees the exact moment the rollback tool pauses with its arguments. The operator approves; metrics recover to 1.2% and 312 ms p95 latency; the audit trail records who approved what and why.
 
 ## Submission Story
 

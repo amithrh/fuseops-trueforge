@@ -45,13 +45,17 @@ describe("IncidentStore", () => {
     expect(snapshot.audit.map((event) => event.kind)).toContain("incident.resolved");
   });
 
-  it("makes repeated rollback calls idempotent", async () => {
+  it("serializes simultaneous rollback calls and applies exactly one mutation", async () => {
     const store = new IncidentStore();
-    await store.rollback(validInput);
-    const auditLength = store.snapshot().audit.length;
-    const second = await store.rollback(validInput);
-    expect(second.changed).toBe(false);
-    expect(store.snapshot().audit).toHaveLength(auditLength);
+    const [first, second] = await Promise.all([
+      store.rollback(validInput),
+      store.rollback(validInput),
+    ]);
+    const snapshot = store.snapshot();
+
+    expect([first.changed, second.changed].sort()).toEqual([false, true]);
+    expect(snapshot.incident.status).toBe("resolved");
+    expect(snapshot.service.activeVersion).toBe("checkout-v42");
+    expect(snapshot.audit.filter((event) => event.kind === "rollback.completed")).toHaveLength(1);
   });
 });
-

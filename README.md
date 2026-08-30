@@ -97,17 +97,41 @@ In TrueForge settings:
 TRUEFORGE_MODEL=your-provider/your-model npm run agent:register
 ```
 
-For the locally verified configuration, Ollama exposed `qwen3:14b` at `http://localhost:11434/v1` and the agent used `ollama-local/qwen3-14b`.
+For the locally verified configuration, native Ollama used Apple Metal on `http://127.0.0.1:11435/v1`, TrueForge registered that endpoint as `ollama-metal`, and the agent used `ollama-metal/qwen3-14b`. Port `11435` keeps this demo isolated when a Docker Ollama instance already owns the default `11434` port:
 
-Qwen 3 can spend most of a local demo in its optional thinking mode. When using Qwen through Ollama, put `/no_think` on the first line before the copied demo prompt. Omit that provider-specific control token for cloud models that do not document it. The checked-in manifest caps each response at 1,200 tokens so the tool-driven run remains practical on local hardware.
+```bash
+OLLAMA_HOST=127.0.0.1:11435 OLLAMA_KEEP_ALIVE=30m ollama serve
+```
+
+To reproduce that provider in **TrueForge Settings → Model providers**, use:
+
+- Provider name: `ollama-metal`
+- Base URL: `http://127.0.0.1:11435/v1`
+- Model ID: `qwen3:14b`
+- Display name: `qwen3-14b`
+- Context length: `32768`
+- Maximum output tokens: `3000`
+- Advertised reasoning efforts: `none`
+
+The resulting model FQN is `ollama-metal/qwen3-14b`. Advertising `none` is required for this checked-in manifest because TrueForge validates `reasoning_effort` against the provider metadata during registration.
+
+The checked-in manifest sends `reasoning_effort: "none"`, which Ollama's OpenAI-compatible endpoint maps to thinking disabled, and caps each response at 3,000 tokens. This avoids Qwen's long optional reasoning trace while leaving enough space for the complete tool workflow. If another provider does not support that setting, remove it or select a model that advertises the corresponding reasoning capability before registration.
 
 Switch the console to **Live harness**, open the embedded TrueForge agent library and select **FuseOps Commander**, reset the scenario, and paste the prompt produced by **Copy demo prompt**. The iframe starts at TrueForge's normal home screen, so selecting the saved agent is an explicit setup step.
 
-### Pre-submission live-run gate
+### Verified live run
 
-Replay, the six-tool MCP contract, the guarded state machine, builds, and the embedded TrueForge client are verified locally. The complete TrueForge path through model generation, MCP calls, sandbox/subagents, the approval card, and post-approval recovery is **not yet verified**.
+The complete TrueForge path passed locally on 2026-08-30 in session `01m19qc2w5b87hpa6z9dj0ds6y`:
 
-The current Docker-hosted Ollama `qwen3:14b` run stayed in its first CPU-only generation for 5 minutes 24 seconds and emitted no tool call before cancellation. A direct smoke test with a smaller 7B model also emitted no tool call within 60 seconds. Before recording or submitting, use a responsive tool-capable cloud model or run Ollama natively with Metal acceleration, re-register the agent with its exact model FQN, and complete the live approval flow. `/no_think` and the 1,200-token cap reduce local work, but they are not substitutes for that proof.
+- five initial root MCP evidence calls;
+- exactly two dynamic subagents, limited to evidence review;
+- one successful TrueForge sandbox command producing a 360-second deploy-to-incident interval and a 0.90 correlation score;
+- one root `rollback_deployment` call paused at the real TrueForge approval card;
+- no simulator mutation before Allow;
+- approved rollback from `checkout-v43` to `checkout-v42`;
+- post-action verification of 1.2% error rate, 312 ms p95 latency, and resolved incident status.
+
+The run completed in 2 minutes 12 seconds including a 29-second human review at the approval card, and TrueForge recorded zero reasoning tokens. The earlier Docker-hosted CPU-only `qwen3:14b` attempt took 5 minutes 24 seconds without reaching a tool call; moving the same model to native Metal and using `reasoning_effort: "none"` resolved that runtime blocker. See [`outputs/LIVE_TEST_EVIDENCE.md`](outputs/LIVE_TEST_EVIDENCE.md) for the preserved verification summary.
 
 ## Useful commands
 
@@ -145,7 +169,8 @@ docs/                  Scope, PRD, architecture, checklist, demo, and PR packet
 - The simulator deliberately avoids live cloud and payment credentials.
 - TrueForge standalone is for local use and should not be exposed to the public internet.
 - Provider and sandbox availability depend on the judge's local TrueForge setup; replay mode remains fully evaluable without them.
-- The checked-in live flow is configured but must still pass the pre-submission live-run gate above on a responsive tool-capable provider.
+- The verified live run used a host-native Metal runtime; other hardware/provider combinations should complete a fresh live smoke before recording.
+- TrueForge standalone v0.1.4 emits non-blocking Monaco JSON-worker method errors while rendering its JSON approval viewer. They did not prevent the approval, rollback, or completed run, and they originate in the embedded upstream client rather than the FuseOps console.
 
 ## AI assistance disclosure
 

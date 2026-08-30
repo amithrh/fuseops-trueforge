@@ -45,7 +45,7 @@
   Spec ref: `spec.md > Operator console`
   What to build: Embedded TrueForge standalone client, investigation prompt, evidence timeline, and visible waiting/recovery states.
   Acceptance: Live mode exposes the official TrueForge trace and approval card without hiding harness behavior.
-  Verify: Production build and live iframe/composer smoke test passed; the real approval-card execution remains the explicit step 11 gate.
+  Verify: Production build, live iframe/composer smoke, and the real approval-card execution passed; see step 11.
 
 - [x] **7. Add deterministic replay mode**
   Spec ref: `spec.md > Operator console`
@@ -68,14 +68,13 @@
 - [x] **10. Prepare submission handoff**
   Spec ref: `prd.md > Submission Proof Points`
   What to build: Submission write-up, honest limitations, testing instructions, form-answer draft, PR description, and final readiness checklist.
-  Acceptance: The handoff separates verified evidence, the pending live-runtime proof, and account-owned submission steps.
-  Verify: Review the handoff and ensure no draft language represents the pending live run as completed.
+  Acceptance: The handoff separates verified technical evidence from account-owned submission steps.
+  Verify: Review the handoff and ensure the completed live run is documented without claiming unfinished Qodo, publishing, video, or form work.
 
-- [ ] **11. Prove the live approval boundary before submission**
+- [x] **11. Prove the live approval boundary before submission**
   Spec ref: `spec.md > Demo And Submission Flow`
   What to verify: Run a responsive tool-capable model through TrueForge evidence calls, sandbox/subagents, the real rollback approval card, approved mutation, and recovery check.
-  Current blocker: Docker-hosted CPU-only `qwen3:14b` remained in its first generation for 5m24s and emitted no MCP tool call before cancellation; a smaller 7B direct smoke also emitted no tool call within 60s.
-  Recommended next attempt: use a cloud tool-calling model or native Metal-accelerated Ollama, re-register the same agent, then record the exact session evidence.
+  Verify: Native Metal `ollama-metal/qwen3-14b` completed session `01m19qc2w5b87hpa6z9dj0ds6y` in 2m12s: five root evidence calls, two subagents, one sandbox result (`360`, `0.90`), the real approval card, approved rollback, and verified recovery.
 
 ## Completion evidence
 
@@ -83,6 +82,6 @@
 - MCP contract: initialize, tool discovery, evidence read, destructive annotations, and guarded mutation passed.
 - Browser: 1440 px desktop and 390 px mobile layouts reviewed; replay states and recovery interaction verified.
 - TrueForge configuration: local capabilities, provider, six-tool MCP connection, agent manifest, approval policy, and embedded responsive composer verified.
-- TrueForge live execution: not yet verified beyond the first model generation; no live MCP tool call or approval card was reached.
+- TrueForge live execution: verified end to end in session `01m19qc2w5b87hpa6z9dj0ds6y`; one root approval request changed `checkout-v43` to `checkout-v42`, followed by 1.2%/312ms/resolved post-checks.
 - Documentation: public README, MIT license, contribution policy, three-minute script, PR description, and submission answers created.
-- Remaining prerequisites: complete the responsive-provider live run, then publish the repository, request and resolve Qodo review, record/upload the verified video, replace placeholders, and submit the form.
+- Remaining prerequisites: participant hands-on test, public repository, Qodo review/merge evidence, fresh-clone check, video upload, remaining placeholders, and manual form submission.

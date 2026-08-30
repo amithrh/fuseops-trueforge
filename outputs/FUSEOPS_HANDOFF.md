@@ -2,7 +2,7 @@
 
 ## Status
 
-Ready for participant replay/UI testing, but **not submission-ready**. The live TrueForge approval-boundary run is still unproven, and the hackathon form has not been submitted.
+Ready for participant replay and live hands-on testing. The technical TrueForge gate is proven; submission still waits on the participant hands-on check, public repository/Qodo trail, fresh-clone verification, video upload, final placeholders, and manual Google Form submission.
 
 ## Verified locally
 
@@ -14,13 +14,19 @@ Ready for participant replay/UI testing, but **not submission-ready**. The live 
 - Mobile UI: passed at 390 px
 - TrueForge local capabilities: sandbox, skills, and settings available
 - TrueForge MCP/agent configuration: `fuseops-control-plane` and `fuseops-commander` registered locally
-- Embedded live client: responsive TrueForge composer visible with no browser console errors
+- Embedded live client: responsive composer and completed flow; TrueForge v0.1.4 emits non-blocking Monaco JSON-worker method errors during approval rendering while the outer FuseOps app remains functional
+- Native Metal provider: `ollama-metal/qwen3-14b` on `127.0.0.1:11435`, with thinking disabled through `reasoning_effort: none`
+- Complete live TrueForge session: `01m19qc2w5b87hpa6z9dj0ds6y`, 2m12s including 29s human review
+- Live trace: five initial root MCP reads, exactly two evidence-review subagents, one successful sandbox exec (`360`, `0.90`), one root approval request, and two post-action checks
+- Recovery: approved `checkout-v43` → `checkout-v42`, 1.2% error rate, 312 ms p95, incident resolved
 
-## Not yet verified
+## Still account-owned
 
-- No end-to-end live run has reached an MCP tool call, sandbox/subagent work, the real approval card, or post-approval recovery.
-- Docker-hosted CPU-only Qwen3 14B remained in its first generation for 5m24s before cancellation; a smaller 7B direct smoke also emitted no tool call within 60s.
-- Use a responsive tool-capable cloud model or native Metal-accelerated Ollama, then preserve the completed TrueForge session as submission evidence. `/no_think` and the 1,200-token cap are mitigations, not proof.
+- Public GitHub repository under the participant's account
+- Representative Qodo-reviewed and human-merged pull request
+- Public/unlisted YouTube demo no longer than three minutes
+- Final Qodo findings, subjective ratings, and URL placeholders
+- Final review and submission of both Google Form pages
 
 ## Your hands-on test
 
@@ -40,21 +46,22 @@ In FuseOps, test **Demo replay** first:
 
 Then test **Live harness**:
 
-1. Configure a responsive tool-capable model, run the idempotent agent registration command, ensure TrueForge is running, and select **FuseOps Commander**.
+1. Confirm native Ollama on `127.0.0.1:11435`, TrueForge, and both FuseOps services are running; select **FuseOps Commander**.
 2. Reset the scenario.
 3. Copy the demo prompt from FuseOps and run it in TrueForge.
-4. Confirm read-only MCP evidence, at least two hypotheses, a sandbox correlation script, and the paused rollback call.
+4. Confirm read-only MCP evidence, exactly two hypotheses, a sandbox correlation script, and the paused rollback call.
 5. Review and approve the exact call, then confirm recovery.
 
 ## Remaining finish line
 
-1. Complete the live TrueForge tools, sandbox/subagents, approval, mutation, and recovery flow on a responsive provider.
+1. Perform the participant hands-on replay and live smoke described above.
 2. Create a public GitHub repository and install/enable Qodo review.
 3. Push `main` and the prepared feature branch.
 4. Open a PR using `docs/PR_DESCRIPTION.md`; resolve Qodo feedback and merge it.
 5. Replace the Qodo placeholders in README and `wemakedevs-submission.md` with the real review outcome.
-6. Record the verified approximately three-minute live video using `docs/demo-script.md` and add its public URL.
-7. Replace all remaining URL, rating, feedback, and live-proof placeholders in `wemakedevs-submission.md`.
-8. Complete both pages of the official WeMakeDevs Google Form and submit it yourself.
+6. Fresh-clone the public repository, run `npm run check`, and repeat the secret scan.
+7. Record the verified approximately three-minute live video using `docs/demo-script.md` and add its public URL.
+8. Replace all remaining URL, rating, and Qodo feedback placeholders in `wemakedevs-submission.md`.
+9. Complete both pages of the official WeMakeDevs Google Form and submit it yourself.
 
-Do not submit before the live-run gate is proven and the Qodo evidence link and public video URL are present.
+Do not submit before the Qodo evidence link, public repository, and public/unlisted video URL are present.

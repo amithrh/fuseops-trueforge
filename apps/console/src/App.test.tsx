@@ -76,6 +76,11 @@ describe("FuseOps console", () => {
     await act(async () => {
       await vi.advanceTimersByTimeAsync(0);
     });
+    expect(screen.getByRole("heading", { name: "Payments are failing." })).toBeInTheDocument();
+    expect(screen.getByText("18.4%")).toBeInTheDocument();
+    expect(screen.getByText("v43")).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Allow rollback_deployment?" })).not.toBeInTheDocument();
+    expect(screen.queryByText("Checkout recovered.")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Run investigation" })).toHaveFocus();
   });
 

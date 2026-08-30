@@ -109,7 +109,7 @@ export function createMcpServer(store: IncidentStore): McpServer {
     {
       title: "Rollback deployment",
       description:
-        "IRREVERSIBLE OPERATIONAL ACTION. Roll back the currently active implicated deployment after a human approves the exact arguments.",
+        "ROOT COMMANDER ONLY. Dynamic subagents must never call or request this tool. IRREVERSIBLE OPERATIONAL ACTION: roll back the currently active implicated deployment only after the root commander synthesizes all evidence and a human approves the exact arguments.",
       inputSchema: {
         incident_id: z.string().min(1),
         deployment_id: z.string().min(1),
@@ -134,4 +134,3 @@ export function createMcpServer(store: IncidentStore): McpServer {
 
   return server;
 }
-

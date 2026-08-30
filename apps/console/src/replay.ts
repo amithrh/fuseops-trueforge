@@ -52,8 +52,8 @@ export const initialReplay: Snapshot = {
 export const replaySteps = [
   { kind: "evidence.read", summary: "Metrics sampled — error rate is 18.4%", actor: "trueforge-agent" },
   { kind: "evidence.read", summary: "Deploy 4c21f0a aligned to incident onset", actor: "trueforge-agent" },
-  { kind: "subagent.completed", summary: "3 hypotheses tested in parallel", actor: "trueforge-agent" },
-  { kind: "sandbox.completed", summary: "Correlation script: deploy ↔ failures = 0.94", actor: "trueforge-agent" },
+  { kind: "subagent.completed", summary: "2 competing evidence reviews completed", actor: "trueforge-agent" },
+  { kind: "sandbox.completed", summary: "Correlation script: deploy ↔ failures = 0.90", actor: "trueforge-agent" },
   { kind: "approval.waiting", summary: "Rollback held for human approval", actor: "trueforge-agent" },
 ] as const;
 
@@ -93,4 +93,3 @@ export function recoverReplay(snapshot: Snapshot): Snapshot {
     ],
   };
 }
-

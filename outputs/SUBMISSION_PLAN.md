@@ -6,13 +6,15 @@ Deadline: August 30, 2026 at 8:00 PM London time (August 31 at 12:30 AM IST).
 
 ## Critical path
 
-1. Use a responsive tool-capable cloud model or native Metal-accelerated Ollama and complete the real TrueForge tools → sandbox/subagents → approval → recovery flow. The current CPU-only Docker run did not reach a tool call.
+Technical gate complete: native Metal TrueForge session `01m19qc2w5b87hpa6z9dj0ds6y` passed tools → two subagents → sandbox → approval → rollback → recovery in 2m12s.
+
+1. Perform the participant hands-on test.
 2. Publish the repository publicly.
 3. Install Qodo, open the prepared implementation PR, address its findings, rerun Qodo, and human-merge.
 4. Add the representative merged PR link and real Qodo decision summary under the exact README heading `## Qodo Code Review Evidence`.
 5. Fresh-clone the repository, follow the README, run `npm run check`, and scan for secrets.
 6. Record a maximum-three-minute demo of the verified live flow; upload it to YouTube.
-7. Finalize the aspirational answers drafted in `wemakedevs-submission.md` using the real live evidence, including the mandatory page-two feedback.
+7. Complete the remaining URL, rating, and Qodo placeholders in `wemakedevs-submission.md`, including the mandatory page-two feedback.
 8. Review all links and submit the official Google Form personally.
 
 ## Required form inputs

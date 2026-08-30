@@ -25,10 +25,10 @@ console production build passed
 control-plane production build passed
 desktop and 390px mobile browser review passed
 TrueForge capabilities, saved agent, iframe, and six-tool MCP discovery passed locally
-full live model → tools → approval → recovery run pending on a responsive provider
+live session 01m19qc2w5b87hpa6z9dj0ds6y passed: 2 subagents, sandbox 360/0.90, root approval, v43 → v42, 1.2%/312ms/resolved
 ```
 
-The pending live run is a submission gate, not a passing claim: Docker-hosted CPU-only Qwen3 14B remained in its first generation for 5m24s and emitted no tool call before cancellation.
+The verified live run used native Apple Metal Qwen3 14B with `reasoning_effort: none` and completed in 2m12s including the human approval review. The earlier CPU-only Docker failure remains documented as a reproducible learning, not a passing claim.
 
 ## Qodo checklist
 
