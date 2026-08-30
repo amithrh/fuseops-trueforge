@@ -2,15 +2,15 @@
 
 Nothing has been sent to the WeMakeDevs form. This file mirrors the official two-page Google Form inspected on 2026-08-30.
 
-**Live proof complete:** TrueForge session `01m19qc2w5b87hpa6z9dj0ds6y` completed the real MCP tools, two subagents, sandbox calculation, approval, rollback, and verified recovery path on 2026-08-30. The form remains unsubmitted until the public repository, Qodo trail, video, ratings, and URLs below are complete.
+**Live proof complete:** TrueForge session `01m19qc2w5b87hpa6z9dj0ds6y` completed the real MCP tools, two subagents, sandbox calculation, approval, rollback, and verified recovery path on 2026-08-30. The form remains unsubmitted until the public repository, Qodo trail, ratings, and remaining required fields below are complete.
 
 ## Required assets
 
 - Public GitHub repository: `PUBLIC_REPOSITORY_URL`
 - Representative merged Qodo-reviewed PR: `QODO_REVIEWED_PR_URL`
-- Public or unlisted YouTube video, no longer than three minutes: `YOUTUBE_VIDEO_URL`
-- Optional deployed application: `OPTIONAL_DEPLOYED_URL`
-- Optional blog post: `OPTIONAL_BLOG_URL`
+- Public or unlisted YouTube video, no longer than three minutes: https://youtu.be/wkmzrRd3BYA
+- Optional deployed application: not applicable; FuseOps is a local-only TrueForge demonstrator
+- Optional blog post: not published
 
 ## Page 1 — Project submission
 
@@ -43,15 +43,13 @@ The repository must be public, include a usable README, and retain a real commit
 
 ### Deployed link to project — optional
 
-`OPTIONAL_DEPLOYED_URL`
-
-Leave blank if FuseOps remains a local TrueForge application.
+Leave blank. FuseOps is intentionally a local-only TrueForge demonstrator.
 
 ### YouTube video demo link — required
 
-`YOUTUBE_VIDEO_URL`
+https://youtu.be/wkmzrRd3BYA
 
-Maximum length: three minutes. Show the project, stack and architecture, working demo, and optionally learning and growth. The recording should visibly show TrueForge calling MCP tools, running sandbox code, delegating, pausing for approval, and verifying recovery.
+Verified published duration: 2 minutes 30 seconds. The recording shows the project, stack and architecture, working demo, TrueForge tool use, sandbox/subagent evidence, the approval boundary, and verified recovery.
 
 ### What does your project do? — required
 
@@ -69,7 +67,7 @@ Do not replace these placeholders with invented claims; use the actual review fi
 
 ### Blog link — optional
 
-`OPTIONAL_BLOG_URL`
+Leave blank; no blog was published. Do not select the Best Blog Post track.
 
 ## Page 2 — Required feedback
 
@@ -112,7 +110,7 @@ The representative FuseOps implementation PR (`QODO_REVIEWED_PR_URL`) stood out 
 - [ ] Replace the exact README Qodo evidence placeholders with the merged PR and real review outcome.
 - [x] Complete and preserve evidence from the live TrueForge tools → sandbox/subagents → approval → recovery run.
 - [ ] Run the README from a fresh clone and confirm `npm run check` passes.
-- [ ] Record and upload the final YouTube demo, maximum three minutes.
+- [x] Render, verify, and upload the final YouTube demo (2:30): https://youtu.be/wkmzrRd3BYA
 - [ ] Fill the remaining Qodo and rating placeholders above.
 - [ ] Complete both form pages and perform the final form submission personally.
 
@@ -124,5 +122,5 @@ The representative FuseOps implementation PR (`QODO_REVIEWED_PR_URL`) stood out 
 4. Resolve Qodo findings, request follow-up review, and merge.
 5. Update README and this packet with the real Qodo evidence.
 6. Fresh-clone smoke test and secret scan.
-7. Record the verified live flow using `docs/demo-script.md`; upload to YouTube.
+7. Use the verified YouTube demo at https://youtu.be/wkmzrRd3BYA.
 8. Complete both pages of the WeMakeDevs form and review every URL before submitting.
