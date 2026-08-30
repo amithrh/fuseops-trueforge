@@ -75,4 +75,20 @@ describe("FuseOps MCP contract", () => {
     expect(result.isError).toBe(true);
     expect(store.snapshot()).toEqual(before);
   });
+
+  it("rejects overlong rollback evidence before any state change", async () => {
+    const { client, store } = await connectedPair();
+    const before = store.snapshot();
+    const result = await client.callTool({
+      name: "rollback_deployment",
+      arguments: {
+        incident_id: incidentIds.incident,
+        deployment_id: incidentIds.badDeployment,
+        evidence: "x".repeat(1001),
+      },
+    });
+
+    expect(result.isError).toBe(true);
+    expect(store.snapshot()).toEqual(before);
+  });
 });

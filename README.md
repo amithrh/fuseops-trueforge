@@ -44,13 +44,15 @@ TrueForge remains visible and central: its local web client is embedded directly
 
 - **TrueForge:** durable agent manifest, dynamic subagents, sandboxed correlation, MCP orchestration, generative UI support, and a human approval checkpoint.
 - **Owned MCP server:** five read-only evidence tools and one destructive, idempotent rollback tool using Streamable HTTP.
-- **Qodo:** all substantive project code is prepared as one feature-branch PR. The required completed review trail is the final account-owned build step.
+- **Qodo:** the public rollback-hardening PR preserves Qodo's initial findings, our decisions, the remediation commit, and follow-up review.
 
 The destructive tool advertises `readOnlyHint: false` and `destructiveHint: true`. The TrueForge manifest independently requires approval for `rollback_deployment`; the tool also validates the incident and active deployment and is idempotent after success.
 
 ## Qodo Code Review Evidence
 
-**Status: pending.** No Qodo review has been completed yet. The substantive implementation is prepared on `feat/fuseops-incident-commander`; this section will be updated with the representative merged PR, Qodo's actual findings, our decisions and changes, and the follow-up review only after those events occur.
+**Status: review complete.** [PR #1](https://github.com/amithrh/fuseops-trueforge/pull/1) is the representative rollback-domain hardening change. Qodo's [persistent review](https://github.com/amithrh/fuseops-trueforge/pull/1#issuecomment-5470750643) and [high-severity inline finding](https://github.com/amithrh/fuseops-trueforge/pull/1#discussion_r3890300787) identified that a retry with different canonical evidence could be accepted as an unchanged success, even though TrueForge approval applies to the exact tool arguments. We accepted the finding, bound resolved-state retries to the normalized evidence in the original `rollback.requested` audit event, added a conflicting-evidence regression test, and recorded the [remediation response](https://github.com/amithrh/fuseops-trueforge/pull/1#discussion_r3890304469). Qodo's follow-up marked that finding resolved and updated the review through commit `a42d383`.
+
+Qodo later questioned the documented test count after omitting the four cases in `App.test.tsx`. We checked the actual Vitest output, retained the correct total of 23, clarified the four-file breakdown, and recorded the [evidence-based decision](https://github.com/amithrh/fuseops-trueforge/pull/1#discussion_r3890310416). The public thread therefore shows both outcomes: accepting and fixing a valid safety finding, and explaining a reasoned dismissal when the automated evidence was incomplete.
 
 ## Run locally
 
@@ -67,7 +69,7 @@ npm install
 npm run check
 ```
 
-`npm run check` type-checks both apps, runs 16 tests, and creates production builds.
+`npm run check` type-checks both apps, runs 23 Vitest cases across four test files, and creates production builds.
 
 ### 2. Start FuseOps
 
@@ -135,7 +137,7 @@ The run completed in 2 minutes 12 seconds including a 29-second human review at 
 
 ```bash
 npm run typecheck       # TypeScript checks
-npm test                # 16 safety, replay, and console-behavior tests
+npm test                # 23 cases across four safety, replay, and console test files
 npm run build           # Production builds
 npm run check           # All of the above
 npm run agent:preview   # Print the resolved manifest without registering
