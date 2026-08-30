@@ -67,7 +67,7 @@ npm install
 npm run check
 ```
 
-`npm run check` type-checks both apps, runs 16 tests, and creates production builds.
+`npm run check` type-checks both apps, runs 22 tests, and creates production builds.
 
 ### 2. Start FuseOps
 
@@ -135,7 +135,7 @@ The run completed in 2 minutes 12 seconds including a 29-second human review at 
 
 ```bash
 npm run typecheck       # TypeScript checks
-npm test                # 16 safety, replay, and console-behavior tests
+npm test                # 22 safety, replay, and console-behavior tests
 npm run build           # Production builds
 npm run check           # All of the above
 npm run agent:preview   # Print the resolved manifest without registering

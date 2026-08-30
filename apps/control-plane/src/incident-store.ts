@@ -11,6 +11,9 @@ import type {
 
 const INCIDENT_ID = "inc-checkout-2026-08-30";
 const BAD_DEPLOYMENT_ID = "deploy-checkout-v43";
+const TARGET_DEPLOYMENT_ID = "deploy-checkout-v42";
+const MIN_EVIDENCE_LENGTH = 20;
+const MAX_EVIDENCE_LENGTH = 1000;
 
 const clone = <T>(value: T): T => structuredClone(value);
 
@@ -157,26 +160,51 @@ export class IncidentStore {
 
   private applyRollback(input: RollbackInput): RollbackResult {
     this.assertIncident(input.incidentId);
-    if (input.evidence.trim().length < 20) {
-      throw new Error("Rollback evidence must explain the observed cause in at least 20 characters.");
-    }
+    const evidence = this.normalizeEvidence(input.evidence);
     const deployment = this.deployments.find((item) => item.id === input.deploymentId);
     if (!deployment) {
       throw new Error(`Unknown deployment: ${input.deploymentId}`);
     }
+    const target = this.deployments.find((item) => item.id === TARGET_DEPLOYMENT_ID);
+    if (!target) {
+      throw new Error("Seed invariant failed: rollback target is missing.");
+    }
 
-    if (this.incident.status === "resolved" && !deployment.active) {
+    const activeDeployments = this.deployments.filter((item) => item.active);
+    if (this.incident.status === "resolved") {
+      const isCompletedRollback =
+        deployment.id === BAD_DEPLOYMENT_ID &&
+        !deployment.active &&
+        deployment.rolledBackAt !== null &&
+        target.active &&
+        activeDeployments.length === 1 &&
+        activeDeployments[0]?.id === target.id &&
+        this.service.activeVersion === target.version;
+
+      if (!isCompletedRollback) {
+        throw new Error("Rollback invariant failed: resolved state does not match a completed rollback.");
+      }
       return {
         changed: false,
-        previousVersion: "checkout-v43",
+        previousVersion: deployment.version,
         activeVersion: this.service.activeVersion,
         incidentStatus: this.incident.status,
         errorRatePct: this.service.errorRatePct,
         message: "Rollback was already completed; no additional state changed.",
       };
     }
+
     if (!deployment.active || deployment.id !== BAD_DEPLOYMENT_ID) {
       throw new Error(`Deployment ${input.deploymentId} is not the active rollback candidate.`);
+    }
+    if (
+      activeDeployments.length !== 1 ||
+      activeDeployments[0]?.id !== deployment.id ||
+      deployment.rolledBackAt !== null ||
+      target.active ||
+      this.service.activeVersion !== deployment.version
+    ) {
+      throw new Error("Rollback invariant failed: deployment and service state are inconsistent.");
     }
 
     const completedAt = new Date().toISOString();
@@ -186,14 +214,12 @@ export class IncidentStore {
       kind: "rollback.requested",
       actor: "trueforge-agent",
       summary: `Rollback requested for ${deployment.version}`,
-      detail: input.evidence,
+      detail: evidence,
     });
 
     deployment.active = false;
     deployment.rolledBackAt = completedAt;
     const previousVersion = deployment.version;
-    const target = this.deployments.find((item) => item.id === "deploy-checkout-v42");
-    if (!target) throw new Error("Seed invariant failed: rollback target is missing.");
     target.active = true;
     this.service = {
       ...this.service,
@@ -232,6 +258,17 @@ export class IncidentStore {
     };
   }
 
+  private normalizeEvidence(value: string): string {
+    if (value.length > MAX_EVIDENCE_LENGTH) {
+      throw new Error(`Rollback evidence must not exceed ${MAX_EVIDENCE_LENGTH} characters.`);
+    }
+    const normalized = value.trim().replace(/\s+/g, " ");
+    if (normalized.length < MIN_EVIDENCE_LENGTH) {
+      throw new Error("Rollback evidence must explain the observed cause in at least 20 characters.");
+    }
+    return normalized;
+  }
+
   private assertIncident(incidentId: string): void {
     if (incidentId !== this.incident.id) {
       throw new Error(`Unknown incident: ${incidentId}`);
@@ -253,4 +290,3 @@ export const incidentIds = {
   incident: INCIDENT_ID,
   badDeployment: BAD_DEPLOYMENT_ID,
 } as const;
-
