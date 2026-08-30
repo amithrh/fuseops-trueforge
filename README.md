@@ -44,13 +44,15 @@ TrueForge remains visible and central: its local web client is embedded directly
 
 - **TrueForge:** durable agent manifest, dynamic subagents, sandboxed correlation, MCP orchestration, generative UI support, and a human approval checkpoint.
 - **Owned MCP server:** five read-only evidence tools and one destructive, idempotent rollback tool using Streamable HTTP.
-- **Qodo:** the public rollback-hardening PR is undergoing an initial review, remediation, and follow-up review with Qodo.
+- **Qodo:** the public rollback-hardening PR preserves Qodo's initial findings, our decisions, the remediation commit, and follow-up review.
 
 The destructive tool advertises `readOnlyHint: false` and `destructiveHint: true`. The TrueForge manifest independently requires approval for `rollback_deployment`; the tool also validates the incident and active deployment and is idempotent after success.
 
 ## Qodo Code Review Evidence
 
-**Status: review in progress.** [PR #1](https://github.com/amithrh/fuseops-trueforge/pull/1) contains the representative rollback-domain hardening change. In its [initial review](https://github.com/amithrh/fuseops-trueforge/pull/1#issuecomment-5470750643), Qodo raised one high-severity correctness finding: a retry with different canonical evidence could be accepted as an unchanged success, even though TrueForge approval applies to the exact tool arguments. We accepted the finding and changed the resolved-state path to compare the retry with the original normalized evidence in the `rollback.requested` audit event; conflicting retries now fail closed without adding an event or changing state. A regression test preserves that behavior. Follow-up review is pending and will be linked here before merge.
+**Status: review complete.** [PR #1](https://github.com/amithrh/fuseops-trueforge/pull/1) is the representative rollback-domain hardening change. Qodo's [persistent review](https://github.com/amithrh/fuseops-trueforge/pull/1#issuecomment-5470750643) and [high-severity inline finding](https://github.com/amithrh/fuseops-trueforge/pull/1#discussion_r3890300787) identified that a retry with different canonical evidence could be accepted as an unchanged success, even though TrueForge approval applies to the exact tool arguments. We accepted the finding, bound resolved-state retries to the normalized evidence in the original `rollback.requested` audit event, added a conflicting-evidence regression test, and recorded the [remediation response](https://github.com/amithrh/fuseops-trueforge/pull/1#discussion_r3890304469). Qodo's follow-up marked that finding resolved and updated the review through commit `a42d383`.
+
+Qodo later questioned the documented test count after omitting the four cases in `App.test.tsx`. We checked the actual Vitest output, retained the correct total of 23, clarified the four-file breakdown, and recorded the [evidence-based decision](https://github.com/amithrh/fuseops-trueforge/pull/1#discussion_r3890310416). The public thread therefore shows both outcomes: accepting and fixing a valid safety finding, and explaining a reasoned dismissal when the automated evidence was incomplete.
 
 ## Run locally
 
