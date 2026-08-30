@@ -1,0 +1,31 @@
+{
+  "name": "fuseops",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "The incident agent that earns permission to act.",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n control,console -c yellow,cyan \"npm run dev -w @fuseops/control-plane\" \"npm run dev -w @fuseops/console\"",
+    "dev:control": "npm run dev -w @fuseops/control-plane",
+    "dev:console": "npm run dev -w @fuseops/console",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "check": "npm run typecheck && npm run test && npm run build",
+    "agent:register": "node --experimental-strip-types scripts/register-agent.ts",
+    "agent:preview": "node --experimental-strip-types scripts/register-agent.ts --dry-run"
+  },
+  "engines": {
+    "node": ">=22.14"
+  },
+  "devDependencies": {
+    "agent-browser": "^0.35.1",
+    "concurrently": "^9.2.1",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  },
+  "license": "MIT"
+}

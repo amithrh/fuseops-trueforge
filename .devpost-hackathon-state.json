@@ -1,0 +1,37 @@
+{
+  "plugin": "wemakedevs-hackathon",
+  "version": 2,
+  "hackathon": {
+    "slug": "trueforge",
+    "name": "The Agent Harness Hackathon",
+    "url": "https://www.wemakedevs.org/hackathons/trueforge",
+    "selected": true,
+    "source": "known"
+  },
+  "participant": {
+    "name": "",
+    "display_name": ""
+  },
+  "project": {
+    "name": "FuseOps",
+    "summary": "An approval-gated incident response agent that investigates a payment failure, proves the cause, and asks before rollback.",
+    "ai_usage": "TrueForge orchestrates MCP tools, sandbox diagnostics, parallel subagents, durable sessions, and human approval.",
+    "codex_usage": "Codex researched the event, scoped the product, wrote the build plan, implemented it, and verified the local system."
+  },
+  "current_stage": "prepare-submission",
+  "completed_stages": ["start-hackathon", "review", "resources", "build-project", "prepare-submission"],
+  "rules_acknowledged": true,
+  "learning": {
+    "status": "complete",
+    "current_step": "handoff",
+    "completed_steps": ["onboard", "scope", "prd", "spec", "checklist", "build"],
+    "plan_file": "docs/hackathon-build/scope.md",
+    "checklist_file": "docs/hackathon-build/checklist.md"
+  },
+  "submission": {
+    "platform": "WeMakeDevs Google Form",
+    "draft_file": "wemakedevs-submission.md",
+    "status": "drafting"
+  },
+  "next_command": "submit-project"
+}

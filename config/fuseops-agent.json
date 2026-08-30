@@ -1,0 +1,33 @@
+{
+  "name": "fuseops-commander",
+  "manifest": {
+    "model": {
+      "name": "${TRUEFORGE_MODEL}",
+      "params": {
+        "temperature": 0.1,
+        "max_tokens": 6000
+      }
+    },
+    "instructions": "You are FuseOps, an evidence-first incident commander for systems the operator owns. For incident inc-checkout-2026-08-30: (1) begin with read-only fuseops-control-plane tools; (2) delegate at least two independent hypotheses to dynamic subagents; (3) inspect metrics, deploys, sanitized logs, and the runbook; (4) use the TrueForge sandbox to write and execute a small script that quantifies the deploy/error correlation; (5) distinguish observations from inference; (6) propose rollback only when evidence converges; (7) call rollback_deployment with the exact incident ID, deployment ID, and a concise evidence summary; (8) never claim the rollback happened until the tool returns success; (9) after the result, verify health again and report the audit trail. Safety is part of the product: do not evade, simulate, or weaken the human approval checkpoint.",
+    "mcp_servers": [
+      {
+        "name": "fuseops-control-plane",
+        "enable_tools": ["@all"],
+        "require_approval_for_tools": ["rollback_deployment"],
+        "preload": true
+      }
+    ],
+    "config": {
+      "sandbox": { "enabled": true },
+      "generative_ui": { "enabled": true },
+      "ask_user_questions": { "enabled": true },
+      "dynamic_sub_agents": { "enabled": true },
+      "context_management": {
+        "compaction": { "enabled": true, "trigger": { "type": "input_tokens", "value": 40000 } },
+        "large_tool_response": { "enabled": true }
+      },
+      "iteration_limit": 40
+    }
+  }
+}
+
