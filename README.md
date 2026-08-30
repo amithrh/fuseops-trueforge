@@ -50,9 +50,7 @@ The destructive tool advertises `readOnlyHint: false` and `destructiveHint: true
 
 ## Qodo Code Review Evidence
 
-**Required before submission:** replace `QODO_REVIEWED_PR_URL` with the public URL of the representative merged PR containing the FuseOps implementation.
-
-Qodo surfaced **`QODO_FINDING_SUMMARY`**. We **`QODO_DECISION_AND_CHANGE`**. The PR history must show the initial review, our response or reasoned dismissal, the resulting code update, and a follow-up Qodo review against the final code.
+**Status: pending.** No Qodo review has been completed yet. The substantive implementation is prepared on `feat/fuseops-incident-commander`; this section will be updated with the representative merged PR, Qodo's actual findings, our decisions and changes, and the follow-up review only after those events occur.
 
 ## Run locally
 

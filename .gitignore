@@ -8,3 +8,16 @@ dist/
 coverage/
 playwright-report/
 test-results/
+video/audio/
+video/captures/
+video/hyperframes/node_modules/
+video/hyperframes/dist/
+video/hyperframes/.hyperframes/
+video/hyperframes/.media/
+video/hyperframes/.thumbnails/
+video/hyperframes/.waveform-cache/
+video/hyperframes/assets/generated/
+video/hyperframes/snapshots/
+video/hyperframes/renders/
+outputs/*.mp4
+outputs/*.webm

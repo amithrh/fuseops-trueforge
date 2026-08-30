@@ -13,7 +13,7 @@
 
 ### 0:00–0:15 — Stakes
 
-“Checkout is failing at 18.4%, seconds after a deploy. Incident teams need agent speed, but they cannot hand an LLM unrestricted production authority. FuseOps is an incident agent that earns permission to act.”
+“Checkout is failing at 18.4%, six minutes after a deploy. Incident teams need agent speed, but they cannot hand an LLM unrestricted production authority. FuseOps is an incident agent that earns permission to act.”
 
 Show the incident headline, metrics, active release, and system path.
 
@@ -43,7 +43,7 @@ Pause for two seconds so the checkpoint is legible. Click **Allow rollback**.
 
 Show the headline change to “Checkout recovered,” error rate at 1.2%, p95 latency at 312 ms, active `v42`, and the completed audit trail.
 
-“The mutation was atomic and idempotent. FuseOps verifies recovery instead of claiming success early, and the complete sequence stays inspectable.”
+“The state change is guarded and idempotent. FuseOps verifies recovery instead of claiming success early, and the complete sequence stays inspectable.”
 
 ### 2:55–3:00 — Close
 
