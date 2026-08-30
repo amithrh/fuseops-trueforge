@@ -44,13 +44,13 @@ TrueForge remains visible and central: its local web client is embedded directly
 
 - **TrueForge:** durable agent manifest, dynamic subagents, sandboxed correlation, MCP orchestration, generative UI support, and a human approval checkpoint.
 - **Owned MCP server:** five read-only evidence tools and one destructive, idempotent rollback tool using Streamable HTTP.
-- **Qodo:** all substantive project code is prepared as one feature-branch PR. The required completed review trail is the final account-owned build step.
+- **Qodo:** the public rollback-hardening PR is undergoing an initial review, remediation, and follow-up review with Qodo.
 
 The destructive tool advertises `readOnlyHint: false` and `destructiveHint: true`. The TrueForge manifest independently requires approval for `rollback_deployment`; the tool also validates the incident and active deployment and is idempotent after success.
 
 ## Qodo Code Review Evidence
 
-**Status: pending.** No Qodo review has been completed yet. The substantive implementation is prepared on `feat/fuseops-incident-commander`; this section will be updated with the representative merged PR, Qodo's actual findings, our decisions and changes, and the follow-up review only after those events occur.
+**Status: review in progress.** [PR #1](https://github.com/amithrh/fuseops-trueforge/pull/1) contains the representative rollback-domain hardening change. In its [initial review](https://github.com/amithrh/fuseops-trueforge/pull/1#issuecomment-5470750643), Qodo raised one high-severity correctness finding: a retry with different canonical evidence could be accepted as an unchanged success, even though TrueForge approval applies to the exact tool arguments. We accepted the finding and changed the resolved-state path to compare the retry with the original normalized evidence in the `rollback.requested` audit event; conflicting retries now fail closed without adding an event or changing state. A regression test preserves that behavior. Follow-up review is pending and will be linked here before merge.
 
 ## Run locally
 
@@ -67,7 +67,7 @@ npm install
 npm run check
 ```
 
-`npm run check` type-checks both apps, runs 22 tests, and creates production builds.
+`npm run check` type-checks both apps, runs 23 tests, and creates production builds.
 
 ### 2. Start FuseOps
 
@@ -135,7 +135,7 @@ The run completed in 2 minutes 12 seconds including a 29-second human review at 
 
 ```bash
 npm run typecheck       # TypeScript checks
-npm test                # 22 safety, replay, and console-behavior tests
+npm test                # 23 safety, replay, and console-behavior tests
 npm run build           # Production builds
 npm run check           # All of the above
 npm run agent:preview   # Print the resolved manifest without registering

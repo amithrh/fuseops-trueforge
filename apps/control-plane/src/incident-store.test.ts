@@ -78,6 +78,20 @@ describe("IncidentStore", () => {
     expect(store.snapshot()).toEqual(afterFirst);
   });
 
+  it("rejects a retry with different evidence and preserves the completed state", async () => {
+    const store = new IncidentStore();
+    await store.rollback(validInput);
+    const completed = store.snapshot();
+
+    await expect(
+      store.rollback({
+        ...validInput,
+        evidence: "A different explanation must not reuse the approval from the original rollback.",
+      }),
+    ).rejects.toThrow("evidence does not match the approved request");
+    expect(store.snapshot()).toEqual(completed);
+  });
+
   it("fails closed without partial mutation when the rollback target is missing", async () => {
     const store = new IncidentStore();
     const internals = store as unknown as { deployments: Array<{ id: string }> };

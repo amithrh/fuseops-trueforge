@@ -172,6 +172,7 @@ export class IncidentStore {
 
     const activeDeployments = this.deployments.filter((item) => item.active);
     if (this.incident.status === "resolved") {
+      const rollbackRequests = this.audit.filter((event) => event.kind === "rollback.requested");
       const isCompletedRollback =
         deployment.id === BAD_DEPLOYMENT_ID &&
         !deployment.active &&
@@ -179,10 +180,14 @@ export class IncidentStore {
         target.active &&
         activeDeployments.length === 1 &&
         activeDeployments[0]?.id === target.id &&
-        this.service.activeVersion === target.version;
+        this.service.activeVersion === target.version &&
+        rollbackRequests.length === 1;
 
       if (!isCompletedRollback) {
         throw new Error("Rollback invariant failed: resolved state does not match a completed rollback.");
+      }
+      if (rollbackRequests[0]?.detail !== evidence) {
+        throw new Error("Rollback retry rejected: evidence does not match the approved request.");
       }
       return {
         changed: false,
